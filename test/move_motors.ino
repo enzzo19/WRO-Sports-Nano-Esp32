@@ -15,7 +15,7 @@ void motor1(int power, int direction) {
 
 // Pines de Definicion del Motor 2
 #define motor2dir1 10
-#define motor2dir2 17  
+#define motor2dir2 18  
 #define motor2pwm 5
 
 // Function to control Motor 2
@@ -26,7 +26,7 @@ void motor2(int power, int direction) {
 }
 
 // Pines de Definicion del Motor 3
-#define motor3dir1 18
+#define motor3dir1 17
 #define motor3dir2 7
 #define motor3pwm 4
 
