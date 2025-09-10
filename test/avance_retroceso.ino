@@ -12,7 +12,7 @@
 #define PWM1 6
 
 #define INA2 10
-#define INB2 13
+#define INB2 18
 #define PWM2 5
 
 #define INA3 17
@@ -32,7 +32,7 @@ float kp = 1;
 float vel0 = 100;
 
 unsigned long tiempoAnterior = 0;
-int estado = 0;
+int estado = 1;
 bool enMovimiento = false;
 unsigned long previousMillis = 0;
 int estado1 = 0;
@@ -349,17 +349,27 @@ void loop() {
 
   float currentYaw = event.orientation.x;
   float currentPitch = event.orientation.z;
+
   float currentRoll = event.orientation.y;
-  Serial.print("Orientation X: ");
-  Serial.println(currentYaw);
 
   if(currentYaw > 180){
    currentYaw = currentYaw - 360;
   }
 
   error =  currentYaw - initialYaw;
-  correccion= error * kp;
 
+  correccion=error*kp;
+
+  Serial.print(estado);
+  Serial.print("correccion: ");
+  Serial.print(correccion);
+  Serial.print("angulo: ");
+  Serial.print(currentYaw);
+  Serial.println("estado: ");
+
+
+
+      
   unsigned long currentMillis = millis();
 
   bool switchDerechoActivado = digitalRead(SWITCH_DERECHO_PIN) == LOW;
@@ -367,19 +377,9 @@ void loop() {
   bool switchIzquierdoActivado = digitalRead(SWITCH_IZQUIERDO_PIN) == LOW; 
 
   switch (estado) {
-    case 0: //se mueve hacia la izquierda hasta que toque el swich
-      ai();
-
-      if (switchIzquierdoActivado== 1) {
-        pare();
-        estado = 1;
-        previousMillis = currentMillis;
-      }
-
-    break;
-
 
     case 1://avanza por tiempo
+
       if (error > 50) {
        gi();
       }
@@ -390,18 +390,8 @@ void loop() {
         aproporcional();
         if ( currentMillis - previousMillis >= 1500){
         previousMillis = currentMillis;
-         estado = 2; 
+         estado = 3; 
         }
-      }
-    break;
-    
-    case 2://se mueve hacia la derecha por tiempo
-      ad();
-
-      if (currentMillis - previousMillis >= 1100) {
-        pare();
-        estado = 3;
-        previousMillis = currentMillis;
       }
     break;
 
@@ -415,67 +405,11 @@ void loop() {
       }
      else {
        rproporcional();                      
-       if (switchTraseroActivado == 0) {
+       if (switchTraseroActivado == 1) {
         previousMillis = currentMillis;
-         estado = 8; 
+         estado = 1; 
        }
       }      
-    break;
-
-    case 8://se mueve a la izquierda por tiempo
-     ai();
-     if (currentMillis - previousMillis >= 500){//puede que el tiempo no este bien y se deba cambiar
-       pare();
-       estado = 1;
-       previousMillis = currentMillis;
-      }
-    break;
-
-    case 9: //por el mismo tiempo que el case 1. Avanza por el medio
-
-      if (error > 50) {
-       gi();
-      }
-      else if (error < -50) {
-       gd();
-      }
-      else {  
-        aproporcional();
-        if ( currentMillis - previousMillis >= 15000){
-        previousMillis = currentMillis;
-         estado = 11; 
-        }
-      }
-    break;
-
-    case 11://se mueve hacia la derecha por tiempo
-     ad();
-     if (currentMillis - previousMillis >= 600){//tiwmpo debe ser mayor al del caso 8
-      pare();
-      estado = 12;
-      previousMillis = currentMillis;
-     }
-    break;
-
-    case 12://retrocede hasta que toque el swich y comienza de nuevo
-
-     if (error > 50) {
-       gi();
-      }
-     else if (error < -50) {
-       gd();
-      }
-     else {
-       rproporcional();                      
-       if (switchTraseroActivado == 0) {
-        previousMillis = currentMillis;
-         estado = 0; 
-       }
-      }      
-    break;
-
-    case 13:
-
     break;
   }
 }
